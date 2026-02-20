@@ -64,12 +64,12 @@ bootstrap.php            # PSR-4 style autoloading
 4. Open:
    - UI: `http://localhost:8000`
    - APIs:
-     - `GET /api/employees`
-     - `POST /api/employees`
-     - `PATCH /api/employees/{id}`
-     - `POST /api/attendance`
-     - `GET /api/attendance/summary?month=YYYY-MM`
-     - `GET /api/attendance/export?month=YYYY-MM`
+     - `GET /api/index.php?route=employees`
+     - `POST /api/index.php?route=employees`
+     - `PATCH /api/index.php?route=employees/{id}`
+     - `POST /api/index.php?route=attendance`
+     - `GET /api/index.php?route=attendance/summary&month=YYYY-MM`
+     - `GET /api/index.php?route=attendance/export&month=YYYY-MM`
 
 ## Attendance Percentage Formula
 
@@ -86,3 +86,15 @@ For each employee in selected month:
 
 - Business rule enforced: an employee can use `permission_1h` only once per month.
 - Code is modular, ready for expansion (authentication, role management, pagination, audit logs).
+
+## Apache / XAMPP Hosting Note
+
+If you open the repository root in Apache and see a directory listing, use one of these approaches:
+
+- Preferred: set your VirtualHost `DocumentRoot` to the `public/` folder.
+- Included fallback: this project now includes root `index.php` + `.htaccess` that forwards traffic to `public/`.
+
+So you can open either:
+- `http://localhost/your-project/public/`
+- or `http://localhost/your-project/` (auto-forwarded)
+
