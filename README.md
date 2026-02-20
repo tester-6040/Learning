@@ -4,6 +4,7 @@ A professional attendance management website for offices with 100+ employees.
 
 ## Features
 
+- Secure login authorization (session based).
 - Employee master management (create/update/list).
 - Attendance marking with statuses:
   - Present
@@ -30,12 +31,14 @@ A professional attendance management website for offices with 100+ employees.
 
 ```txt
 public/
-  index.php              # UI dashboard
-  api/index.php          # REST-like API router
+  index.php              # Protected dashboard UI
+  login.php              # Authentication screen
+  api/index.php          # API router
+  .htaccess              # Apache entry rules for /public
 src/
   Core/                  # Config, DB, Session, BaseModel, ApiResponse
-  Models/                # Employee, Attendance models
-  Services/              # Attendance business logic
+  Models/                # User, Employee, Attendance models
+  Services/              # Auth + Attendance business logic
   Controllers/           # API controllers
 database/schema.sql      # DB schema
 bootstrap.php            # PSR-4 style autoloading
@@ -62,14 +65,26 @@ bootstrap.php            # PSR-4 style autoloading
    ```
 
 4. Open:
-   - UI: `http://localhost:8000`
-   - APIs:
-     - `GET /api/index.php?route=employees`
-     - `POST /api/index.php?route=employees`
-     - `PATCH /api/index.php?route=employees/{id}`
-     - `POST /api/index.php?route=attendance`
-     - `GET /api/index.php?route=attendance/summary&month=YYYY-MM`
-     - `GET /api/index.php?route=attendance/export&month=YYYY-MM`
+   - Login: `http://localhost:8000/login.php`
+   - Dashboard: `http://localhost:8000/`
+
+5. Default login:
+   - Username: `admin`
+   - Password: `admin@123`
+
+## API Endpoints
+
+- `POST /api/index.php?route=auth/login`
+- `POST /api/index.php?route=auth/logout`
+- `GET /api/index.php?route=auth/me`
+- `GET /api/index.php?route=employees`
+- `POST /api/index.php?route=employees`
+- `PATCH /api/index.php?route=employees/{id}`
+- `POST /api/index.php?route=attendance`
+- `GET /api/index.php?route=attendance/summary&month=YYYY-MM`
+- `GET /api/index.php?route=attendance/export&month=YYYY-MM`
+
+> All employee/attendance endpoints require login session authorization.
 
 ## Attendance Percentage Formula
 
@@ -82,19 +97,17 @@ For each employee in selected month:
 
 `attendance_percentage = (credited_days / total_marked_entries) * 100`
 
+## Apache / XAMPP Hosting Notes
+
+If you see **Index of ...** or **Forbidden**:
+
+- Do not open filesystem-style URLs like `http://localhost/C:/xampp/...`.
+- Place project under Apache web root (for example `C:\xampp\htdocs\Learning`).
+- Open via: `http://localhost/Learning/` or `http://localhost/Learning/public/`.
+- Prefer VirtualHost `DocumentRoot` pointing to the project's `public/` directory.
+- This project includes root `index.php`, root `.htaccess`, and `public/.htaccess` for compatibility.
+
 ## Notes
 
 - Business rule enforced: an employee can use `permission_1h` only once per month.
-- Code is modular, ready for expansion (authentication, role management, pagination, audit logs).
-
-## Apache / XAMPP Hosting Note
-
-If you open the repository root in Apache and see a directory listing, use one of these approaches:
-
-- Preferred: set your VirtualHost `DocumentRoot` to the `public/` folder.
-- Included fallback: this project now includes root `index.php` + `.htaccess` that forwards traffic to `public/`.
-
-So you can open either:
-- `http://localhost/your-project/public/`
-- or `http://localhost/your-project/` (auto-forwarded)
-
+- Code is modular and ready for expansion (roles, password reset, audit logs, reports).

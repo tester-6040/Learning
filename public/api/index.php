@@ -3,13 +3,20 @@
 declare(strict_types=1);
 
 use App\Controllers\AttendanceController;
+use App\Controllers\AuthController;
 use App\Controllers\EmployeeController;
 use App\Core\ApiResponse;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\User;
 use App\Services\AttendanceService;
+use App\Services\AuthService;
 
 require dirname(__DIR__, 2) . '/bootstrap.php';
+
+$authService = new AuthService(new User());
+$authService->bootDefaultAdmin();
+$authController = new AuthController($authService);
 
 $employeeController = new EmployeeController(new Employee());
 $attendanceModel = new Attendance();
@@ -29,6 +36,26 @@ if ($route === '') {
 }
 
 $payload = ApiResponse::input();
+
+if ($route === 'auth/login' && $method === 'POST') {
+    $authController->login($payload ?: $_POST);
+    return;
+}
+
+if ($route === 'auth/logout' && $method === 'POST') {
+    $authController->logout();
+    return;
+}
+
+if ($route === 'auth/me' && $method === 'GET') {
+    $authController->me();
+    return;
+}
+
+if (!$authService->check()) {
+    ApiResponse::json(['error' => 'Unauthorized'], 401);
+    return;
+}
 
 if ($route === 'employees' && $method === 'GET') {
     $employeeController->index();
@@ -64,5 +91,5 @@ if ($route === 'attendance/export' && $method === 'GET') {
 
 ApiResponse::json([
     'error' => 'Route not found',
-    'hint' => 'Use ?route=employees, ?route=attendance, ?route=attendance/summary, or ?route=attendance/export',
+    'hint' => 'Use ?route=auth/login, auth/logout, auth/me, employees, attendance, attendance/summary, or attendance/export',
 ], 404);
